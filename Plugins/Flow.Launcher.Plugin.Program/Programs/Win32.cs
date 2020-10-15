@@ -15,6 +15,7 @@ using Flow.Launcher.Plugin.SharedCommands;
 using Windows.UI.Core;
 using NLog.Filters;
 using System.Text.RegularExpressions;
+using ToolGood.Words.Pinyin;
 
 namespace Flow.Launcher.Plugin.Program.Programs
 {
@@ -54,6 +55,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
 
             (string[] spaceSplitName, string[] upperSplitName) = Name switch
             {
+                string n when WordsHelper.HasChinese(n) => (null, null),
                 string n when n.Contains(' ') => (Name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), default(string[])),
 
                 string n when n.Any(x => x == char.ToUpper(x)) && n.Any(x => x == char.ToLower(x)) => (null,
