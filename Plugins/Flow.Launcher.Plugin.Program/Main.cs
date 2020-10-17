@@ -46,17 +46,11 @@ namespace Flow.Launcher.Plugin.Program
             {
                 if (IsStartupIndexProgramsRequired || !_win32s.Any())
                     Stopwatch.Normal("|Flow.Launcher.Plugin.Program.Main|Win32Program index cost", IndexWin32Programs);
-            });
-
-            var b = Task.Run(() =>
-            {
                 if (IsStartupIndexProgramsRequired || !_uwps.Any())
                     Stopwatch.Normal("|Flow.Launcher.Plugin.Program.Main|Win32Program index cost", IndexUWPPrograms);
+                _settings.LastIndexTime = DateTime.Today;
+
             });
-
-            Task.WaitAll(a, b);
-
-            _settings.LastIndexTime = DateTime.Today;
         }
 
         public void Save()
@@ -79,8 +73,8 @@ namespace Flow.Launcher.Plugin.Program
                  .AsParallel()
                  .Where(p => p.Enabled)
                  .Select(p => p.Result(query.Search, _context.API))
-                 .Where(r => r != null && r.Score > 0)
-                 .OrderBy(r=>r.Score).ToList();
+                 .Where(r => r?.Score > 0)
+                 .ToList();
 
             return result;
         }
