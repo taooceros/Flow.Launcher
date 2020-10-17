@@ -278,7 +278,6 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     _ => Name
                 };
 
-                var match = StringMatcher.FuzzySearch(query, title);
 
                 (string[] spaceSplitName, string[] upperSplitName) = Name switch
                 {
@@ -291,7 +290,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     _ => (null, null)
                 };
 
-
+                MatchResult match = null;
 
                 var acronymMatch = (spaceSplitName, upperSplitName) switch
                 {
@@ -313,6 +312,10 @@ namespace Flow.Launcher.Plugin.Program.Programs
                         (null, var u) => acronymMatch.MatchData.Select((x, i) => u.Take(x).Sum(x => x.Length)).ToList(),
                         _ => null
                     };
+                else
+                {
+                    match = StringMatcher.FuzzySearch(query, title);
+                }
 
                 int score;
                 List<int> titleHighlightData;

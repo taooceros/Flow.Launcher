@@ -49,10 +49,6 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 _ => Name
             };
 
-            var match = StringMatcher.FuzzySearch(query, title);
-
-
-
             (string[] spaceSplitName, string[] upperSplitName) = Name switch
             {
                 string n when WordsHelper.HasChinese(n) => (null, null),
@@ -78,6 +74,8 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 _ => null
             };
 
+            MatchResult match = null;
+
             if (acronymMatch != null && acronymMatch.Score != 0)
                 acronymMatch.MatchData = (spaceSplitName, upperSplitName) switch
                 {
@@ -85,6 +83,10 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     (null, var u) => acronymMatch.MatchData.Select((x, i) => u.Take(x).Sum(x => x.Length)).ToList(),
                     _ => null
                 };
+            else
+            {
+                match = StringMatcher.FuzzySearch(query, title);
+            }
 
             int score;
             List<int> titleHighlightData;
@@ -339,7 +341,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
 
         private static ParallelQuery<Win32> UnregisteredPrograms(List<Settings.ProgramSource> sources, string[] suffixes)
         {
-            var paths = sources.Where(s => Directory.Exists(s.Location) && s.Enabled)
+            var paths = sources.Where(s => s.Enabled && Directory.Exists(s.Location))
                 .SelectMany(s => ProgramPaths(s.Location, suffixes))
                 .Where(t1 => !Main._settings.DisabledProgramSources.Any(x => t1 == x.UniqueIdentifier))
                 .Distinct()
@@ -383,21 +385,18 @@ namespace Flow.Launcher.Plugin.Program.Programs
         {
             // https://msdn.microsoft.com/en-us/library/windows/desktop/ee872121
             const string appPaths = @"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths";
-            var programs = new List<Win32>();
-            using (var root = Registry.LocalMachine.OpenSubKey(appPaths))
+
+            using var localRoot = Registry.LocalMachine.OpenSubKey(appPaths);
+            using var userRoot = Registry.CurrentUser.OpenSubKey(appPaths);
+
+            var programs = (localRoot, userRoot) switch
             {
-                if (root != null)
-                {
-                    programs.AddRange(GetProgramsFromRegistry(root));
-                }
-            }
-            using (var root = Registry.CurrentUser.OpenSubKey(appPaths))
-            {
-                if (root != null)
-                {
-                    programs.AddRange(GetProgramsFromRegistry(root));
-                }
-            }
+                (null, null) => new List<Win32>(),
+                (var l, null) => GetProgramsFromRegistry(l),
+                (null, var u) => GetProgramsFromRegistry(u),
+                (var l, var u) => GetProgramsFromRegistry(l).Concat(GetProgramsFromRegistry(u))
+            };
+
 
             var disabledProgramsList = Main._settings.DisabledProgramSources;
             var toFilter = programs.AsParallel().Where(p => suffixes.Contains(Extension(p.ExecutableName)));
