@@ -16,6 +16,7 @@ using Windows.UI.Core;
 using NLog.Filters;
 using System.Text.RegularExpressions;
 using ToolGood.Words.Pinyin;
+using System.Reflection.PortableExecutable;
 
 namespace Flow.Launcher.Plugin.Program.Programs
 {
@@ -86,6 +87,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
             else
             {
                 match = StringMatcher.FuzzySearch(query, title);
+                acronymMatch = null;
             }
 
             int score;
@@ -93,14 +95,9 @@ namespace Flow.Launcher.Plugin.Program.Programs
 
             // Give value to score and highlightdata from match or acronym match
             //     by which score is higher
-            (score, titleHighlightData) = (match, acronymMatch) switch
-            {
-                (null, var aM) => (aM.Score, aM.MatchData),
-                (var m, null) => (m.Score, m.MatchData),
-                (var m, var aM) when m.Score < aM.Score => (aM.Score, aM.MatchData),
-                (var m, var aM) when m.Score > aM.Score => (m.Score, m.MatchData),
-                _ => (0, null)
-            };
+            score = acronymMatch?.Score ?? match?.Score ?? 0;
+            titleHighlightData = acronymMatch?.MatchData ?? match?.MatchData ?? null;
+            
 
             if (score == 0)
                 return null;
