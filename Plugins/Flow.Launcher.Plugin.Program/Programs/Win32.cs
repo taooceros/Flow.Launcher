@@ -45,7 +45,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
         {
             string title = Description switch
             {
-                string d when d.Length >= Name.Length && d.Substring(0, Name.Length) == Name => d,
+                string d when d.Length >= Name.Length && d[0..Name.Length] == Name => d,
                 string d when !string.IsNullOrEmpty(d) => $"{Name}: {Description}",
                 _ => Name
             };
@@ -55,7 +55,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 string n when WordsHelper.HasChinese(n) => (null, null),
                 string n when n.Contains(' ') => (Name.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries), default(string[])),
 
-                string n when n.Any(x => x == char.ToUpper(x)) && n.Any(x => x == char.ToLower(x)) => (null,
+                string n when n.Any(x => char.IsUpper(x)) && n.Any(x => char.IsLower(x)) => (null,
                     Regex.Split(Name, @"(?<!^)(?=[A-Z])")),
                 _ => (null, null)
             };
@@ -77,7 +77,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
 
             MatchResult match = null;
 
-            if (acronymMatch != null && acronymMatch.Score != 0)
+            if (acronymMatch?.Score > 0)
                 acronymMatch.MatchData = (spaceSplitName, upperSplitName) switch
                 {
                     (var s, null) => acronymMatch.MatchData.Select((x, i) => s.Take(x).Sum(x => x.Length + 1)).ToList(),
@@ -93,11 +93,10 @@ namespace Flow.Launcher.Plugin.Program.Programs
             int score;
             List<int> titleHighlightData;
 
-            // Give value to score and highlightdata from match or acronym match
-            //     by which score is higher
+            // Give the score
             score = acronymMatch?.Score ?? match?.Score ?? 0;
             titleHighlightData = acronymMatch?.MatchData ?? match?.MatchData ?? null;
-            
+
 
             if (score == 0)
                 return null;
@@ -328,7 +327,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
             var extension = Path.GetExtension(path)?.ToLower();
             if (!string.IsNullOrEmpty(extension))
             {
-                return extension.Substring(1);
+                return extension[1..];
             }
             else
             {

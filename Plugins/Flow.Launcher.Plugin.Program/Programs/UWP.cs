@@ -273,7 +273,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
             {
                 string title = Description switch
                 {
-                    string d when d.Length >= Name.Length && d.Substring(0, Name.Length) == Name => d,
+                    string d when d.Length >= Name.Length && d[0..Name.Length] == Name => d,
                     string d when !string.IsNullOrEmpty(d) => $"{Name}: {Description}",
                     _ => Name
                 };
@@ -305,7 +305,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     _ => null
                 };
 
-                if (acronymMatch != null && acronymMatch.Score != 0)
+                if (acronymMatch?.Score > 0)
                     acronymMatch.MatchData = (spaceSplitName, upperSplitName) switch
                     {
                         (var s, null) => acronymMatch.MatchData.Select((x, i) => s.Take(x).Sum(x => x.Length + 1)).ToList(),
@@ -315,6 +315,7 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 else
                 {
                     match = StringMatcher.FuzzySearch(query, title);
+                    acronymMatch = null;
                 }
 
                 int score;
@@ -326,8 +327,6 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 {
                     (null, var aM) => (aM.Score, aM.MatchData),
                     (var m, null) => (m.Score, m.MatchData),
-                    (var m, var aM) when m.Score < aM.Score => (aM.Score, aM.MatchData),
-                    (var m, var aM) when m.Score > aM.Score => (m.Score, m.MatchData),
                     _ => (0, null)
                 };
 
