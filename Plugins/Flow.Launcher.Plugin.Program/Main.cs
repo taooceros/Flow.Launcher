@@ -71,8 +71,7 @@ namespace Flow.Launcher.Plugin.Program
             var result = win32.Cast<IProgram>()
                  .Concat(uwps)
                  .AsParallel()
-                 .Where(p => p.Enabled)
-                 .Select(p => p.Result(query.Search, _context.API))
+                 .Select(p => p.Enabled ? p.Result(query.Search, _context.API) : null)
                  .Where(r => r?.Score > 0)
                  .ToList();
 
