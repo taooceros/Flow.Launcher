@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Flow.Launcher.Infrastructure.Logger;
 
 namespace Flow.Launcher.Infrastructure
@@ -16,6 +17,21 @@ namespace Flow.Launcher.Infrastructure
             var stopWatch = new System.Diagnostics.Stopwatch();
             stopWatch.Start();
             action();
+            stopWatch.Stop();
+            var milliseconds = stopWatch.ElapsedMilliseconds;
+            string info = $"{message} <{milliseconds}ms>";
+            Log.Debug(info);
+            return milliseconds;
+        }
+
+        /// <summary>
+        /// This stopwatch will appear only in Debug mode, used for async method
+        /// </summary>
+        public async static Task<long> DebugAsync(string message, Func<Task> action)
+        {
+            var stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+            await action();
             stopWatch.Stop();
             var milliseconds = stopWatch.ElapsedMilliseconds;
             string info = $"{message} <{milliseconds}ms>";

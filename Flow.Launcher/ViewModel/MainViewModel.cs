@@ -455,24 +455,14 @@ namespace Flow.Launcher.ViewModel
                             }
                         }, currentCancellationToken);
 
-                        // so looping will stop once it was cancelled
-                        var parallelOptions = new ParallelOptions { CancellationToken = currentCancellationToken };
-                        try
+                        var pluginQueryTasks = plugins.Select(async plugin =>
                         {
-                            Parallel.ForEach(plugins, parallelOptions, plugin =>
-                            {
-                                if (!plugin.Metadata.Disabled)
-                                {
-                                    var results = PluginManager.QueryForPlugin(plugin, query);
-                                    if (!currentCancellationToken.IsCancellationRequested)
-                                        _resultsUpdateQueue.Post(new ResultsForUpdate(results, plugin.Metadata, query, currentCancellationToken));
-                                }
-                            });
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            // nothing to do here
-                        }
+                            var results = await PluginManager.QueryForPlugin(plugin, query, currentCancellationToken);
+                            if (!currentCancellationToken.IsCancellationRequested)
+                                _resultsUpdateQueue.Post(new ResultsForUpdate(results, plugin.Metadata, query, currentCancellationToken));
+                        });
+
+                        await Task.WhenAll(pluginQueryTasks);
 
 
                         // this should happen once after all queries are done so progress bar should continue
