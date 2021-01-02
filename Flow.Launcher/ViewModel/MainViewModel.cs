@@ -464,6 +464,8 @@ namespace Flow.Launcher.ViewModel
 
                         await Task.WhenAll(pluginQueryTasks);
 
+                        if (currentCancellationToken.IsCancellationRequested)
+                            return;
 
                         // this should happen once after all queries are done so progress bar should continue
                         // until the end of all querying
