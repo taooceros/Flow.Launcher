@@ -460,7 +460,7 @@ namespace Flow.Launcher.ViewModel
                                         _resultsUpdateQueue.Post(new ResultsForUpdate(results, plugin.Metadata, query,
                                             currentCancellationToken));
                                 }
-                                catch (Exception e)
+                                catch (Exception e) when (!(e is TaskCanceledException))
                                 {
                                     Log.Exception($"|MainViewModel|Query For Plugin {plugin.Metadata.Name}", e);
                                 }
