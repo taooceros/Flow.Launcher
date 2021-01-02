@@ -7,14 +7,8 @@ namespace Flow.Launcher.Plugin
 {
     public interface IPlugin
     {
-        List<Result> Query(Query query)
-        {
-            return new List<Result>();
-        }
-        Task<List<Result>> QueryAsync(Query query, CancellationToken token)
-        {
-            return Task.Run(() => Query(query));
-        }
+        List<Result> Query(Query query);
+        
         void Init(PluginInitContext context);
     }
 }

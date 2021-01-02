@@ -23,11 +23,11 @@ namespace Flow.Launcher.Infrastructure
             Log.Debug(info);
             return milliseconds;
         }
-
+        
         /// <summary>
-        /// This stopwatch will appear only in Debug mode, used for async method
+        /// This stopwatch will appear only in Debug mode
         /// </summary>
-        public async static Task<long> DebugAsync(string message, Func<Task> action)
+        public static async Task<long> DebugAsync(string message, Func<Task> action)
         {
             var stopWatch = new System.Diagnostics.Stopwatch();
             stopWatch.Start();
@@ -38,7 +38,7 @@ namespace Flow.Launcher.Infrastructure
             Log.Debug(info);
             return milliseconds;
         }
-
+        
         public static long Normal(string message, Action action)
         {
             var stopWatch = new System.Diagnostics.Stopwatch();
@@ -50,6 +50,20 @@ namespace Flow.Launcher.Infrastructure
             Log.Info(info);
             return milliseconds;
         }
+        
+        public static async Task<long> NormalAsync(string message, Func<Task> action)
+        {
+            var stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+            await action();
+            stopWatch.Stop();
+            var milliseconds = stopWatch.ElapsedMilliseconds;
+            string info = $"{message} <{milliseconds}ms>";
+            Log.Info(info);
+            return milliseconds;
+        }
+        
+        
 
         public static void StartCount(string name, Action action)
         {
