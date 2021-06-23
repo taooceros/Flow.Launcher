@@ -29,9 +29,25 @@ namespace Flow.Launcher.Infrastructure.Logger
 
             var configuration = new LoggingConfiguration();
 
-            const string layout =
-                @"${logger}->${time}|${level}|${message}|${onexception:inner=${logger}->${newline}${date:format=HH\:mm\:ss}|${level}${newline}Message:${message}${newline}${exception}${newline}}";
-
+            /*
+             Log looks like this:
+            2021Jun23 - 12:15:39.7283967+07:00 - INFO  - PluginManager - InitializePlugins|"Total init cost for <Program> is <540ms>"
+            2021Jun23 - 12:15:39.9217398+07:00 - DEBUG - PluginManager - InitializePlugins|"Init method time cost for <Browser Bookmarks> <724ms>"
+            2021Jun23 - 12:15:39.9217398+07:00 - INFO  - PluginManager - InitializePlugins|"Total init cost for <Browser Bookmarks> is <745ms>"
+            2021Jun23 - 12:15:40.4979608+07:00 - INFO  - App - OnStartupAsync|"Dependencies Info:
+            Python Path: "
+            2021Jun23 - 12:15:40.5522216+07:00 - INFO  - App - OnStartupAsync|"End Flow Launcher startup ----------------------------------------------------  "
+            2021Jun23 - 12:15:40.5522216+07:00 - INFO  - App - OnStartupAsync|"Startup cost <2287ms>"
+            */
+            const string layout = 
+                @"${date:format=yyyyMMMdd - HH\:mm\:ss.fffffffK} - " +
+                @"${pad:padding=-5:inner=${level:uppercase=true}} - ${logger} - ${message}" +
+                @"${onexception:inner=${logger}->${newline}" +
+                @"${date:format=yyyyMMMdd - HH\:mm\:ss.fffffffK} - " +
+                @"${pad:padding=-5:inner=${level:uppercase=true}}${newline}" +
+                @"Message:${message}${newline}"+
+                @"${exception}${newline}}";
+            
             var fileTarget = new FileTarget
             {
                 Name = "file",
